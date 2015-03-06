@@ -2,11 +2,12 @@ require 'test_helper'
 
 class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
   context "Naming module" do
-    class ::DummyNamingModel
-      extend ActiveModel::Naming
-
+    class ::DummyNamingModel < ActiveRecord::Base
       extend  Elasticsearch::Model::Naming::ClassMethods
       include Elasticsearch::Model::Naming::InstanceMethods
+    end
+
+    class ::DummyInheritedModel < ::DummyNamingModel
     end
 
     module ::MyNamespace
@@ -23,6 +24,11 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
       assert_equal 'dummy_naming_models', DummyNamingModel.new.index_name
     end
 
+    should "return the inherited index_name" do
+      assert_equal 'dummy_naming_models', DummyInheritedModel.index_name
+      assert_equal 'dummy_naming_models', DummyInheritedModel.new.index_name
+    end
+
     should "return the sanitized default index_name for namespaced model" do
       assert_equal 'my_namespace-dummy_naming_model_in_namespaces', ::MyNamespace::DummyNamingModelInNamespace.index_name
       assert_equal 'my_namespace-dummy_naming_model_in_namespaces', ::MyNamespace::DummyNamingModelInNamespace.new.index_name
@@ -33,9 +39,15 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
       assert_equal 'dummy_naming_model', DummyNamingModel.new.document_type
     end
 
+    should "return the inherited document_type" do
+      assert_equal 'dummy_naming_model', DummyInheritedModel.document_type
+      assert_equal 'dummy_naming_model', DummyInheritedModel.new.document_type
+    end
+
     should "set and return the index_name" do
       DummyNamingModel.index_name 'foobar'
       assert_equal 'foobar', DummyNamingModel.index_name
+      assert_equal 'foobar', DummyInheritedModel.index_name
 
       d = DummyNamingModel.new
       d.index_name 'foobar_d'
@@ -59,6 +71,7 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
     should "set the index_name with setter" do
       DummyNamingModel.index_name = 'foobar_index_S'
       assert_equal 'foobar_index_S', DummyNamingModel.index_name
+      assert_equal 'foobar_index_S', DummyInheritedModel.index_name
 
       d = DummyNamingModel.new
       d.index_name = 'foobar_index_s'
@@ -83,6 +96,7 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
     should "set and return the document_type" do
       DummyNamingModel.document_type 'foobar'
       assert_equal 'foobar', DummyNamingModel.document_type
+      assert_equal 'foobar', DummyInheritedModel.document_type
 
       d = DummyNamingModel.new
       d.document_type 'foobar_d'
@@ -92,6 +106,7 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
     should "set the document_type with setter" do
       DummyNamingModel.document_type = 'foobar_type_S'
       assert_equal 'foobar_type_S', DummyNamingModel.document_type
+      assert_equal 'foobar_type_S', DummyInheritedModel.document_type
 
       d = DummyNamingModel.new
       d.document_type = 'foobar_type_s'
