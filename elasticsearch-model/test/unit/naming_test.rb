@@ -5,17 +5,25 @@ class Elasticsearch::Model::NamingTest < Test::Unit::TestCase
     class ::DummyNamingModel < ActiveRecord::Base
       extend  Elasticsearch::Model::Naming::ClassMethods
       include Elasticsearch::Model::Naming::InstanceMethods
+      self.table_name = :dummy_table
     end
 
     class ::DummyInheritedModel < ::DummyNamingModel
     end
 
     module ::MyNamespace
-      class DummyNamingModelInNamespace
-        extend ActiveModel::Naming
-
+      class DummyNamingModelInNamespace < ActiveRecord::Base
         extend  Elasticsearch::Model::Naming::ClassMethods
         include Elasticsearch::Model::Naming::InstanceMethods
+        self.table_name = :dummy_table
+      end
+    end
+
+    setup do
+      ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ":memory:")
+      ActiveRecord::Schema.define(:version => 1) do
+        create_table :dummy_table, force: true do |t|
+        end
       end
     end
 
