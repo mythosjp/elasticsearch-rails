@@ -2,8 +2,7 @@ require 'test_helper'
 
 class Elasticsearch::Model::IndexingTest < Test::Unit::TestCase
   context "Indexing module: " do
-    class ::DummyIndexingModel
-      extend ActiveModel::Naming
+    class ::DummyIndexingModel < ActiveRecord::Base
       extend Elasticsearch::Model::Naming::ClassMethods
       extend Elasticsearch::Model::Indexing::ClassMethods
 
@@ -122,9 +121,11 @@ class Elasticsearch::Model::IndexingTest < Test::Unit::TestCase
     end
 
     context "Instance methods" do
-      class ::DummyIndexingModelWithCallbacks
+      class ::DummyIndexingModelWithCallbacks < ActiveRecord::Base
         extend  Elasticsearch::Model::Indexing::ClassMethods
         include Elasticsearch::Model::Indexing::InstanceMethods
+
+        self.table_name = :dummy_table
 
         def self.before_save(&block)
           (@callbacks ||= {})[block.hash] = block
@@ -137,9 +138,11 @@ class Elasticsearch::Model::IndexingTest < Test::Unit::TestCase
         end
       end
 
-      class ::DummyIndexingModelWithCallbacksAndCustomAsIndexedJson
+      class ::DummyIndexingModelWithCallbacksAndCustomAsIndexedJson < ActiveRecord::Base
         extend  Elasticsearch::Model::Indexing::ClassMethods
         include Elasticsearch::Model::Indexing::InstanceMethods
+
+        self.table_name = :dummy_table
 
         def self.before_save(&block)
           (@callbacks ||= {})[block.hash] = block
@@ -153,6 +156,14 @@ class Elasticsearch::Model::IndexingTest < Test::Unit::TestCase
 
         def as_indexed_json(options={})
           { :foo => 'B' }
+        end
+      end
+
+      setup do
+        ActiveRecord::Base.establish_connection(:adapter => 'sqlite3', :database => ":memory:")
+        ActiveRecord::Schema.define(:version => 1) do
+          create_table :dummy_table, force: true do |t|
+          end
         end
       end
 
@@ -372,8 +383,7 @@ class Elasticsearch::Model::IndexingTest < Test::Unit::TestCase
     end
 
     context "Re-creating the index" do
-      class ::DummyIndexingModelForRecreate
-        extend ActiveModel::Naming
+      class ::DummyIndexingModelForRecreate < ActiveRecord::Base
         extend Elasticsearch::Model::Naming::ClassMethods
         extend Elasticsearch::Model::Indexing::ClassMethods
 

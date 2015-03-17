@@ -24,6 +24,7 @@ Gem::Specification.new do |s|
   s.required_ruby_version = ">= 1.9.3"
 
   s.add_dependency "elasticsearch",       '> 0.4'
+  s.add_dependency "activerecord",        '> 3'
   s.add_dependency "activesupport",       '> 3'
   s.add_dependency "hashie"
 
